@@ -40,7 +40,6 @@
     - [Adding Credentials in Jenkins](#adding-credentials-in-jenkins)
       - [GitHub Credentials](#github-credentials)
       - [GitHub Read Package Credentials](#github-read-package-credentials)
-      - [Kubernetes Credentials](#kubernetes-credentials)
     - [Adding Managed Files for NPM Configuration in Jenkins](#adding-managed-files-for-npm-configuration-in-jenkins)
     - [Adding Managed Files for Container Registry in Jenkins](#adding-managed-files-for-container-registry-in-jenkins)
     - [Jenkins Node.js Configuration](#jenkins-nodejs-configuration)
@@ -81,10 +80,9 @@ Read through the infrastructure spec before starting with the deployment guide.
 
 **Important:** Access to the Tazama GIT Repository is required to proceed. If you do not currently have this access, or if you are unsure about your access level, please reach out to the Tazama Team to request the necessary permissions. It's crucial to ensure that you have the appropriate credentials to access the repository for seamless integration and workflow management.
 
-### List of Repositories for Artifact Registry Setup
-The repository names remain the same as the AWS ECR setup, but they will now reside in a Google Artifact Registry repository.
+### Artifact Registry Setup
 
-To create repositories in Artifact Registry:
+Create a Artifact Registry on Google CLoud:
 
 1. **Enable the Artifact Registry API:** Ensure the Artifact Registry API is enabled in your GCP project.
 2. **Create repositories:** Use the following `gcloud` command:
@@ -513,37 +511,6 @@ Credentials are critical for Jenkins to interact with other services like source
 5. In the description, note the purpose, such as GitHub package read access.
 6. Click **Save**.
 
-#### Kubernetes Credentials
-
-To configure Jenkins to use Kubernetes secrets for authenticating with Kubernetes services or private registries, you can follow these steps, similar to setting up GitHub package read access:
-
-1. **Retrieve the Kubernetes Token**:
-
-- Access your Kubernetes environment and locate the secret intended for Jenkins authentication, in this case, `scjenkins-secret`.
-  - Extract the token value from the secret, which is usually base64-encoded. You have need to decode.
-
-1. **Add Secret in Jenkins**:
-
-- Navigate to the Jenkins dashboard and go to the credentials management section.
-  - Choose to add new credentials, selecting the "Secret text" type.
-  - Paste the token you retrieved from the `scjenkins-secret` in namespace=**processor** into the Secret field.
-
-3. **Configure the Credential ID**:
-
-- Set the ID of the new secret to `kubernetespro`. This ID will be used to reference these credentials within your Jenkins pipelines or job configurations.
-
-4. **Add a Description**:
-
-- Provide a description for the secret to document its use, such as "Token for authenticating Jenkins with Kubernetes services."
-
-5. **Save the Configuration**:
-
-- Click Save to store the new credentials in Jenkins.
-
-Following this process will allow Jenkins jobs to authenticate with Kubernetes using the token stored in the secret, enabling operations that require Kubernetes access or pulling images from private registries linked to your Kubernetes environment.
-
-![image-20240215-150928.png](./Images/image-20240215-150928.png)
-![image-20240215-151159.png](./Images/image-20240215-151159.png)
 
 ### Adding Managed Files for NPM Configuration in Jenkins
 
@@ -746,13 +713,28 @@ kubectl cp . <name of pod>:/var/jenkins_home/jobs/ -n cicd
 
 - After copying the job configurations, your Jenkins instance should recognize the new jobs. Jenkins will automatically load job configurations found in the `/var/jenkins_home/jobs/` directory.
 
+#### Reload Jenkins Configuration:
+
+- You might need to manually reload the Jenkins configuration or restart the Jenkins service for the new job configurations to take effect. This can be done from the Jenkins interface or by restarting the Jenkins pod:
+
+```bash
+kubectl rollout restart deployment <jenkins-deployment-name> -n cicd
+```
+
+- Make sure to replace `<jenkins-deployment-name>` with the actual deployment name of your Jenkins instance.
+- You can also safeRestart through the URL.
+
+**eg:** [http://localhost:52933/safeRestart](http://localhost:52933/safeRestart)
+
+![image-20240215-054140.png](./Images/image-20240215-054140.png)
+
 ### Building Jenkin Agent Locally
 
 **This needs to be completed before adding the Jenkins Cloud agent.**
 
 Please follow the following document to help you build and push the image to the container registry.
 
-[Building the Jenkins Agent Image](https://github.com/frmscoe/docs/blob/main/Technical/Release-Management/building-the-jenkins-image.md) - This link is t show you how to build the docker image , the dockerfile that needs to be used specifically to GC is as follows:
+[Building the Jenkins Agent Image](https://github.com/frmscoe/docs/blob/main/Technical/Release-Management/building-the-jenkins-image.md) - This link is to show you how to build the docker image locally and push it to your registry , the dockerfile that needs to be used specifically to GC is as follows:
 
 ```dockerfile
 # Use a base Jenkins agent image
@@ -850,20 +832,6 @@ By properly configuring image pull secrets in your Jenkins Kubernetes pod templa
 
 ![image-20240215-144955.png](./Images/image-20240215-144955.png)
 
-#### Reload Jenkins Configuration:
-
-- You might need to manually reload the Jenkins configuration or restart the Jenkins service for the new job configurations to take effect. This can be done from the Jenkins interface or by restarting the Jenkins pod:
-
-```bash
-kubectl rollout restart deployment <jenkins-deployment-name> -n cicd
-```
-
-- Make sure to replace `<jenkins-deployment-name>` with the actual deployment name of your Jenkins instance.
-- You can also safeRestart through the URL.
-
-**eg:** [http://localhost:52933/safeRestart](http://localhost:52933/safeRestart)
-
-![image-20240215-054140.png](./Images/image-20240215-054140.png)
 
 # Step 4 :Running Jenkins Jobs to Install Processors
 
@@ -895,18 +863,6 @@ After importing the Jenkins jobs, you need to configure each job with the approp
 - Set the **Repository URL** to the Git repository where the code for the processor is located. This is typically a URL like https://github.com/<Repository>/event-director/.
 - Under Credentials, select the appropriate credentials from the drop-down list, such as **Github Creds**, which should correspond to the credentials that have access to the repository.
 
-3. **Binding Credentials:**
-
-- Under the **Bindings** section, define the environment variables that the job will use internally.
-- For username and password types, such as container registry credentials, set the appropriate **Username Variable** and **Password Variable**. Use **REG\_USER** and **REG\_PASS** for registry credentials.
-- Choose the specific credentials from the drop-down list, like **Login info for the Sybrin Azure container registry.**
-- For secret texts, such as a GitHub access token, set the Variable to an environment variable name, such as **READ\_GH\_TOKEN**, and select the appropriate credentials, like **github public read package**.
-
-By completing these steps, you ensure that each Jenkins job can access the necessary repositories and services with the correct permissions and interact with your Kubernetes cluster using the right endpoints and credentials. It's essential to review and verify these settings regularly, especially after any changes to the credentials or infrastructure.
-
-![image-20240213-064147.png](./Images/image-20240213-064147.png)
-![image-20240213-064707.png](./Images/image-20240213-064707.png)
-![image-20240213-064256.png](./Images/image-20240213-064256.png)
 
 ### Deploying to the Cluster:
 
