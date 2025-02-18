@@ -5,9 +5,9 @@
 
 # Instructions
 
-- [GKE Detailed Installation Guide](#GKE-detailed-installation-guide)
-
-- [Step 1 - Helm charts](#step-1---helm-charts)
+- [GKE Detailed Installation Guide](#gke-detailed-installation-guide)
+- [Instructions](#instructions)
+- [Step 1 - Helm Charts](#step-1---helm-charts)
   - [Overview](#overview)
   - [Prerequisites](#prerequisites)
   - [Adding Required Namespaces](#adding-required-namespaces)
@@ -17,58 +17,60 @@
     - [Ingress Setup](#ingress-setup)
     - [Installing Helm Charts](#installing-helm-charts)
     - [Uninstalling Charts](#uninstalling-charts)
-- [Step 2 : Configuration](#step-2--configuration)
-  - [1. NATS](#1-nats)
-  - [2. ElasticSearch](#2-elasticsearch)
-  - [3. ArangoDB (Single Deployment)](#3-arangodb-single-deployment)
-  - [4. ArangoDB Ingress Proxy](#4-arangodb-ingress-proxy)
-  - [5. Jenkins](#5-jenkins)
-  - [6. Redis-Cluster](#6-redis-cluster)
-  - [7. Nginx Ingress Controller](#7-nginx-ingress-controller)
-  - [8. APM, Logstash, Kibana (Elasticsearch)](#8-apm-logstash-kibana-elasticsearch)
-  - [9. Grafana](#9-grafana)
-  - [10. Prometheus](#10-prometheus)
-  - [11. Vault](#11-vault)
-  - [12. KeyCloak](#12-keycloak)
-- [Step 3: Post-Installation Configuration](#step-3-post-installation-configuration)
+- [Step 2 - Configuration](#step-2---configuration)
+  - [NATS](#nats)
+  - [ElasticSearch](#elasticsearch)
+  - [ArangoDB (Single Deployment)](#arangodb-single-deployment)
+  - [Jenkins](#jenkins)
+  - [Nginx Ingress Controller](#nginx-ingress-controller)
+  - [APM, Logstash, Kibana (Elasticsearch)](#apm-logstash-kibana-elasticsearch)
+  - [Grafana](#grafana)
+  - [Prometheus](#prometheus)
+  - [Vault](#vault)
+  - [KeyCloak](#keycloak)
+- [Step 3 - Post-Installation Configuration](#step-3---post-installation-configuration)
+  - [Elasticsearch Kube Secret for LumberJack](#elasticsearch-kube-secret-for-lumberjack)
   - [Setting up TLS for Ingress](#setting-up-tls-for-ingress)
   - [Configuring Ingress Domain Names](#configuring-ingress-domain-names)
   - [Vault Configuration](#vault-configuration)
   - [Logstash Configuration](#logstash-configuration)
   - [APM Configuration](#apm-configuration)
   - [Jenkins Configuration](#jenkins-configuration)
+    - [Accessing Jenkins UI](#accessing-jenkins-ui)
     - [Adding Credentials in Jenkins](#adding-credentials-in-jenkins)
       - [GitHub Credentials](#github-credentials)
-      - [Container Registry Credentials](#container-registry-credentials)
       - [GitHub Read Package Credentials](#github-read-package-credentials)
       - [Kubernetes Credentials](#kubernetes-credentials)
     - [Adding Managed Files for NPM Configuration in Jenkins](#adding-managed-files-for-npm-configuration-in-jenkins)
+    - [Adding Managed Files for Container Registry in Jenkins](#adding-managed-files-for-container-registry-in-jenkins)
     - [Jenkins Node.js Configuration](#jenkins-nodejs-configuration)
     - [Jenkins Docker Installation Configuration](#jenkins-docker-installation-configuration)
-    - [Building Jenkin Agent Locally](#building-jenkin-agent-locally)
-    - [Setting up a Jenkins cloud agent that will interact with your Kubernetes cluster](#setting-up-a-jenkins-cloud-agent-that-will-interact-with-your-kubernetes-cluster)
     - [Steps to Configure Jenkins Global Variables](#steps-to-configure-jenkins-global-variables)
     - [Adding Jenkins Jobs](#adding-jenkins-jobs)
-      - [Download the Job Configurations:](#download-the-job-configurations)
-      - [Navigate to Configuration Directory:](#navigate-to-configuration-directory)
-      - [Copy Jobs to Jenkins Pod:](#copy-jobs-to-jenkins-pod)
-      - [Finalize the Setup:](#finalize-the-setup)
-      - [Reload Jenkins Configuration:](#reload-jenkins-configuration)
-- [Step 4 :Running Jenkins Jobs to Install Processors](#step-4-running-jenkins-jobs-to-install-processors)
-    - [Overview](#overview-1)
-    - [Populating ArangoDB:](#populating-arangodb)
-    - [Edit Jobs: Configuring Credentials and Kubernetes Endpoints in Jenkins](#edit-jobs-configuring-credentials-and-kubernetes-endpoints-in-jenkins)
-      - [Configuring Rule Processors:](#configuring-rule-processors)
-    - [Deploying to the Cluster:](#deploying-to-the-cluster)
-    - [End-to-End Platform Testing with the "E2E Test" Jenkins Job](#end-to-end-platform-testing-with-the-e2e-test-jenkins-job)
-      - [Overview of the "E2E Test" Job](#overview-of-the-e2e-test-job)
-      - [Purpose and Benefits](#purpose-and-benefits)
-      - [Running the Test and Post-Test Evaluation](#running-the-test-and-post-test-evaluation)
-- [Common Errors\*\*](#common-errors)
-    - [Arango ingress error\*\*](#arango-ingress-error)
-    - [Network Access Error in Container Deployment](#network-access-error-in-container-deployment)
-    - [Addressing Pod Restart Issues in Kubernetes](#addressing-pod-restart-issues-in-kubernetes)
-    - [Addressing Jenkins Build Authentication Errors](#addressing-jenkins-build-authentication-errors)
+      - [Download the Job Configurations](#download-the-job-configurations)
+      - [Navigate to Configuration Directory](#navigate-to-configuration-directory)
+      - [Copy Jobs to Jenkins Pod](#copy-jobs-to-jenkins-pod)
+      - [Finalize the Setup](#finalize-the-setup)
+      - [Reload Jenkins Configuration](#reload-jenkins-configuration)
+    - [Building Jenkins Agent Locally](#building-jenkins-agent-locally)
+    - [Setting up a Jenkins Cloud Agent](#setting-up-a-jenkins-cloud-agent)
+- [Step 4 - Running Jenkins Jobs to Install Processors](#step-4---running-jenkins-jobs-to-install-processors)
+  - [Overview](#overview-1)
+  - [Populating ArangoDB](#populating-arangodb)
+  - [Edit Jobs: Configuring Credentials and Kubernetes Endpoints in Jenkins](#edit-jobs-configuring-credentials-and-kubernetes-endpoints-in-jenkins)
+    - [Configuring Rule Processors](#configuring-rule-processors)
+  - [Deploying to the Cluster](#deploying-to-the-cluster)
+  - [End-to-End Platform Testing with the "E2E Test" Jenkins Job](#end-to-end-platform-testing-with-the-e2e-test-jenkins-job)
+    - [Overview of the "E2E Test" Job](#overview-of-the-e2e-test-job)
+    - [Purpose and Benefits](#purpose-and-benefits)
+    - [Running the Test and Post-Test Evaluation](#running-the-test-and-post-test-evaluation)
+- [Common Errors](#common-errors)
+  - [Arango Ingress Error](#arango-ingress-error)
+  - [Network Access Error in Container Deployment](#network-access-error-in-container-deployment)
+  - [Addressing Pod Restart Issues in Kubernetes](#addressing-pod-restart-issues-in-kubernetes)
+  - [Addressing Jenkins Build Authentication Errors](#addressing-jenkins-build-authentication-errors)
+  - [Jenkins Build Agent Terminating and Restarting](#jenkins-build-agent-terminating-and-restarting)
+  - [Forbidden User on Jenkins Job Builds](#forbidden-user-on-jenkins-job-builds)
 - [Conclusion: Finalizing Tazama System Installation](#conclusion-finalizing-tazama-system-installation)
 
 Read through the infrastructure spec before starting with the deployment guide.
@@ -205,23 +207,13 @@ helm install arango Tazama/arangodb --namespace=development
 helm install jenkins Tazama/jenkins --namespace=cicd
 helm install nats Tazama/nats --namespace=development
 ```
-3. Install Valkey. Valkey is an open source (BSD) high-performance key/value datastore that supports a variety workloads such as caching, message queues, and can act as a primary database.
+3. Install Valkey. 
+
+Valkey is an open source (BSD) high-performance key/value datastore that supports a variety workloads such as caching, message queues, and can act as a primary database.
 
 ```bash
 helm install valkey-cluster bitnami/valkey-cluster --version 2.1.1 --namespace=development
 ```
-
-### Accessing Jenkins UI
-
-The following sections of the guide require you to work within the Jenkins UI. You can either access the UI through a doamin if you configured an ingress or by port forwarding.
-
-Port forward Jenkins to be accessible on localhost:8080 by running:
-  `kubectl --namespace cicd port-forward svc/jenkins 8080:8080`
-
-Get your 'admin' user password by running:
-  `kubectl exec --namespace cicd -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo`
-
-Navigate to the Jenkins UI, username `admin` and retrieved password to login. Go to `Manage Jenkins`, Under `System Configuration`, select `Plugins` and install the `Configuration File`, `Nodejs` and `Docker` plugins that will enable later configuration steps.
 
 **Additional**
 For optional components like Grafana, Prometheus, Vault, and KeyCloak, use similar commands if you decide to implement these features.
@@ -261,58 +253,45 @@ For a system utilizing a variety of Helm charts, optimizing performance, storage
 - **Performance**: Configure resource limits and requests to ensure that ArangoDB has enough CPU and memory.
 - **Documentation**: [ArangoDB Documentation](https://docs.arangodb.com/3.11/deploy/single-instance/)
 
-## 4. ArangoDB Ingress Proxy
-
-- **Configuration**: Set up the ingress rules to properly route traffic to the ArangoDB service.
-- **Security**: Implement TLS termination at the ingress level for secure database connections.
-- **Documentation**: The documentation would typically be part of the ArangoDB Kubernetes Operator guide or the specific ingress controller documentation used in your setup.
-
-## 5. Jenkins
+## 4. Jenkins
 
 - **Configuration**: Utilize configuration as code (JCasC) for easier management and scalability of Jenkins settings.
 - **Storage**: Configure persistent storage for Jenkins home to ensure data is retained across restarts.
 - **Performance**: Adjust executors and resource limits based on your CI/CD pipeline requirements.
 - **Documentation**: [Jenkins Documentation](https://www.jenkins.io/doc/book/)
 
-## 6. Redis-Cluster
-
-- **Configuration**: Set up Redis in cluster mode if high availability and scalability are required.
-- **Storage**: Use persistent storage for data durability. Configure memory limits appropriately.
-- **Performance**: Tune `maxmemory` policies and replication settings for optimal performance.
-- **Documentation**: [Redis Documentation](https://redis.io/docs/)
-
-## 7. Nginx Ingress Controller
+## 5. Nginx Ingress Controller
 
 - **Configuration**: Adjust rate limiting, body size limits, and SSL/TLS configurations to meet your security and usability requirements.
 - **Performance**: Enable HTTP/2, configure SSL ciphers, and tuning worker processes for better performance.
 - **Documentation**: [NGINX Ingress Controller Documentation](https://docs.nginx.com/nginx-ingress-controller/)
 
-## 8. APM, Logstash, Kibana (Elasticsearch)
+## 6. APM, Logstash, Kibana (Elasticsearch)
 
 - **Configuration**: Link these components together for a cohesive monitoring and logging solution. Configure Kibana dashboards for easy visualization.
 - **Storage**: Ensure Elasticsearch has enough storage for logs and APM data. Consider using faster storage classes for better performance.
 - **Performance**: For Logstash, adjust pipeline workers and batch sizes. For APM, tune the sampling rate based on your needs.
 - **Documentation**: [Kibana Documentation](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-kibana.html) [Logstash Documentation](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-logstash.html) [APM Documentation](https://www.elastic.co/guide/en/cloud-on-k8s/current/k8s-apm-server.html)
 
-## 9. Grafana
+## 7. Grafana
 
 - **Configuration**: Use Grafana dashboards to visualize metrics from Prometheus and other data sources.
 - **Security**: Implement OAuth or LDAP for authentication. Use HTTPS for secure connections.
 - **Documentation**: [Grafana Documentation](https://grafana.com/docs/grafana/latest/) [Environment Monitoring](https://frmscoe.atlassian.net/wiki/spaces/FRMS/pages/65241090/Environment+Monitoring)
 
-## 10. Prometheus
+## 8. Prometheus
 
 - **Configuration**: Adjust scrape intervals and retention policies to balance between performance and data granularity.
 - **Storage**: Use persistent volumes for long-term metric storage. Consider high-performance storage for large datasets.
 - **Documentation**: [Prometheus Documentation](https://prometheus.io/docs/introduction/overview/)
 
-## 11. Vault
+## 9. Vault
 
 - **Configuration**: Set up Vault in HA mode with a proper storage backend like Consul for resilience.
 - **Security**: Use auto-unseal feature to automate the unsealing process securely.
 - **Documentation**: [Vault Documentation](https://developer.hashicorp.com/vault/docs)
 
-## 12. KeyCloak
+## 10. KeyCloak
 
 - **Configuration**: Set up realms, clients, and roles according to your authentication and authorization needs.
 - **Performance**: Adjust caching settings and session limits to optimize for your workload.
@@ -525,16 +504,6 @@ Credentials are critical for Jenkins to interact with other services like source
 7. Optionally, provide a description like **GitHub Credentials**.
 8. Click **Save**.
 
-#### Container Registry Credentials
-
-1. Follow the first two steps as above to navigate to the Add Credentials page.
-2. Select **Username with password.**
-3. `Input the username for your container registry.
-4. Enter the corresponding password or access token for the registry. This token was gotten during repository creation
-5. Assign a unique ID, such as **ContainerRegistry**.
-6. Include a description that helps identify the registry, like **Login info for the container registry.**
-7. Click **Save.**
-
 #### GitHub Read Package Credentials
 
 1. Again, follow the initial steps to reach the Add Credentials page.
@@ -606,6 +575,25 @@ The image shows a Jenkins configuration screen for adding a managed file, specif
 
 Once you've added this managed file, Jenkins can use it in various jobs that require npm to access private packages or specific registries. The managed file will be placed in the working directory of the job when it runs, ensuring that npm commands use the provided configuration.
 
+### Adding Managed Files for Container registry in Jenkins
+
+**Navigate to Manage Jenkins → Managed files**
+
+![Jenkins_service_account_file.png](./Images/Jenkins_service_account_file.png)
+
+The image shows a Jenkins configuration screen for adding a managed file, specifically the service account registry. Here's a breakdown of the steps and fields:
+
+1. **Managed Files:** This section is for adding configuration files that Jenkins will manage and use across different jobs.
+2. **ID:** A unique identifier for the managed file. ie: registry
+3. **Name:** In this case, it's **ServiceAccountConfig**. This name helps users identify the file's purpose when selecting it for use in a job.
+4. **Comment:** An optional field where you can provide additional information about the managed file, such as its intended use. Here, it is described as 'user config'.
+
+5. **Content:** The text area labeled 'Content' is where you can input the actual content of the service acount json for the container registry.
+
+6. **Add:** After configuring all the fields, you would click "Add" to save this managed file configuration.
+
+Once you've added this managed file, Jenkins can use it in various jobs that require npm to access private packages or specific registries. The managed file will be placed in the working directory of the job when it runs, ensuring that npm commands use the provided configuration.
+
 ### Jenkins Node.js Configuration
 
 **Navigate to Manage Jenkins → Tools**
@@ -630,74 +618,6 @@ Once you've added this managed file, Jenkins can use it in various jobs that req
   - **Docker version**: Specify which version of Docker Jenkins should install. If you want the most recent version, use "latest". Otherwise, provide a specific version number (e.g., "19.03.12").
 
 ![image-20240213-103453.png](./Images/image-20240213-103453.png)
-
-### Building Jenkin Agent Locally
-
-**This needs to be completed before adding the Jenkins Cloud agent.**
-
-Please follow the following document to help you build and push the image to the container registry.
-
-[Building the Jenkins Agent Image](https://github.com/frmscoe/docs/blob/main/Technical/Release-Management/building-the-jenkins-image.md)
-
-### Setting up a Jenkins cloud agent that will interact with your Kubernetes cluster
-
-- **Navigate to Manage Jenkins → Clouds → Kubernetes**
-- **Add the Path to Your Kubernetes Instance**: Enter the URL of your Kubernetes API server in the Kubernetes URL field. This allows Jenkins to communicate with your Kubernetes cluster.
-- **Disable HTTPS Certificate Check**: If your Kubernetes cluster uses a self-signed certificate or you are in a development environment where certificate validation is not critical, you can disable the HTTPS certificate check. However, for production environments, it is recommended to use a valid SSL certificate and leave this option unchecked for security reasons.
-- **Add Kubernetes Namespace**: Enter `cicd` in the Kubernetes Namespace field. This is where your Jenkins agents will run within the Kubernetes cluster.
-- **Add Your Kubernetes Credentials**: Select the credentials you have created for Kubernetes access. These credentials will be used by Jenkins to authenticate with the Kubernetes cluster.
-- **Select WebSocket**: Enabling WebSocket is useful for maintaining a stable connection between Jenkins and the Kubernetes cluster, especially when Jenkins is behind a reverse proxy or firewall.
-- **Add Jenkins URL**: This should be the internal service URL for Jenkins within your Kubernetes cluster, like `http://jenkins.cicd.svc.cluster.local`
-- **Add Pod Label**: Labels are key-value pairs used for identifying resources within Kubernetes. Here, you should add a label with the key `jenkins` and the value `agent`. This label will be used to associate the built pods with the Jenkins service.
-
-![image-20240212-115316.png](./Images/image-20240212-115316.png)![image-20240212-111931.png](./Images/image-20240212-111931.png)
-
-**Add a Pod Template**: This step involves defining a new pod template, which Jenkins will use to spin up agents on your Kubernetes cluster.
-
-- **Name**: Name the pod template `jenkins-builder`. This name is used to reference the pod template within Jenkins pipelines or job configurations.
-- **Namespace**: Specify `cicd` as the namespace where the Jenkins agents will be deployed within the Kubernetes cluster.
-- **Labels**: Set `jenkins-agent` as the label. This is a key identifier that Jenkins jobs will use to select this pod template when running builds.
-
-![image-20240212-112102.png](./Images/image-20240212-112102.png)
-
-**Add a Container**: In this part of the configuration, you define the container that will run inside the pod created from the pod template.
-
-**NOTE** This needs to point to the docker image built in this step : [Building the Jenkins Agent Image](https://github.com/frmscoe/docs/blob/main/Technical/Release-Management/building-the-jenkins-image.md)
-
-- **Name**: The container name is set to `jnlp`. This is a conventional name for a Jenkins agent container that uses the JNLP (Java Network Launch Protocol) for the master-agent communication.
-- **Docker Image**: The Docker image to use is [example.io/jenkins-inbound-agent:1.0.0](http://example.io/jenkins-inbound-agent:1.0.0) . This image is pre-configured with all the necessary tools to run as a Jenkins agent.
-- **Always Pull Image**: This option ensures that Jenkins always pulls the latest version of the specified Docker image before starting a build. This is important to keep your build environment up-to-date with the latest changes to the image.
-- **Working Directory**: The working directory is set to `/home/jenkins/agent`. This is the directory inside the container where Jenkins will execute the build steps.
-- **Command to Run**: This field is left blank, which means the default command from the Docker image will be used to start the agent.
-
-![image-20240212-115159.png](./Images/image-20240212-115159.png)
-
-**Run in Privileged Mode**: This is an advanced container setting that allows processes within the container to execute with elevated privileges, similar to the root user on a Linux system.
-
-To select "Run in Privileged Mode" in Jenkins Kubernetes plugin:
-
-1. Within the container configuration, look for the "Advanced..." button or link (not visible in the screenshot) and click it to expand the advanced options.
-2. In the advanced settings, find the checkbox labeled "Run in privileged mode" and select it.
-
-![image-20240212-114225.png](./Images/image-20240212-114225.png)
-
-**Image Pull Secret**
-
-Needs to be set to - **frmpullsecret - see screenshot below**
-
-1. **Private Registry Authentication**: If the container images used by your Jenkins jobs are hosted in a private registry, Kubernetes needs to authenticate with that registry. The image pull secret stores the required credentials (like a username and password or token).
-2. **Adding Image Pull Secret to Pod Template**:
-
-- Navigate to the Kubernetes cloud configuration within the Jenkins system settings.
-- Under the specific pod template that you are configuring, find the `ImagePullSecrets` section.
-- Enter the name of the Kubernetes secret that contains your private registry credentials in the `Name` field. This secret should already exist within the same namespace as where your Jenkins builder pods are running.
-- If you have multiple registries or need to pull from multiple private sources, you can add additional image pull secrets by clicking on the “Add Image Pull Secret” dropdown and entering the names of these secrets.
-
-3. **YAML Merge Strategy**: The YAML merge strategy determines how Jenkins should handle the YAML definitions from inherited pod templates. If set to 'Override', it means that the current YAML will completely replace any inherited YAML, which could be important if you need to ensure that the image pull secrets are applied without being altered by any inherited configurations.
-
-By properly configuring image pull secrets in your Jenkins Kubernetes pod templates, you enable Jenkins to pull the necessary private images to run your builds within the Kubernetes cluster. Without these secrets, the image pull would fail, and your builds would not be able to run.
-
-![image-20240215-144955.png](./Images/image-20240215-144955.png)
 
 ### Steps to Configure Jenkins Global Variables
 
@@ -727,6 +647,8 @@ The same reasoning applies to passwords are that explicitly stated to need a sin
 - `APMActive`: A flag to enable or disable Application Performance Monitoring.
   - **Default:** True
   - **value:** true / false
+- `ArtifactRegistryZone`: A variable used for the gcloud cli.
+  - **eg:** us-central1-docker
 - `ArangoPassword`: A secret password required for accessing the Database which is used for populating the Arango configuration.
   - **eg:** rm]ukXyA@M
 - `ArangoConfigurationURL`: Endpoint for the ArangoDB configuration Database.
@@ -765,8 +687,6 @@ The same reasoning applies to passwords are that explicitly stated to need a sin
   - **value:** 8.5.1
 - `EnableQuoting`: A flag to enable or disable quoting functionality adding Pain messages in the chain.
   - **value:** false
-- `envName`: The environment name for the deployment.
-  - **eg:** dev, prod , etc…
 - `FLUSHBYTES`: The byte threshold for flushing data.
   - **value:** 10
 - `ImageRepository`: The repository for Docker images.
@@ -826,6 +746,110 @@ kubectl cp . <name of pod>:/var/jenkins_home/jobs/ -n cicd
 
 - After copying the job configurations, your Jenkins instance should recognize the new jobs. Jenkins will automatically load job configurations found in the `/var/jenkins_home/jobs/` directory.
 
+### Building Jenkin Agent Locally
+
+**This needs to be completed before adding the Jenkins Cloud agent.**
+
+Please follow the following document to help you build and push the image to the container registry.
+
+[Building the Jenkins Agent Image](https://github.com/frmscoe/docs/blob/main/Technical/Release-Management/building-the-jenkins-image.md) - This link is t show you how to build the docker image , the dockerfile that needs to be used specifically to GC is as follows:
+
+```dockerfile
+# Use a base Jenkins agent image
+FROM jenkins/inbound-agent:latest as jnlp
+
+USER root
+
+# Update and install necessary packages for adding new repositories
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    gnupg2 \
+    curl \
+    sudo
+
+# Add Kubernetes package key and set up the repository
+RUN echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+# Add the Google Cloud SDK repository
+RUN mkdir -p /usr/share/keyrings && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && \
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" > /etc/apt/sources.list.d/google-cloud-sdk.list
+
+# Update and install required packages
+RUN apt-get update
+
+# Install kubectl
+RUN apt-get install -qq -y kubectl
+
+# Install Buildah
+RUN apt-get install -y buildah
+
+# Install Google Cloud SDK
+RUN apt-get install -y google-cloud-sdk
+
+# Switch back to the Jenkins user
+USER jenkins
+```
+
+### Setting up a Jenkins cloud agent that will interact with your Kubernetes cluster
+
+- **Navigate to Manage Jenkins → Clouds → Kubernetes**
+- **Add the Path to Your Kubernetes Instance**: Enter the URL of your Kubernetes API server in the Kubernetes URL field. This allows Jenkins to communicate with your Kubernetes cluster.
+- **Disable HTTPS Certificate Check**: If your Kubernetes cluster uses a self-signed certificate or you are in a development environment where certificate validation is not critical, you can disable the HTTPS certificate check. However, for production environments, it is recommended to use a valid SSL certificate and leave this option unchecked for security reasons.
+- **Add Kubernetes Namespace**: Enter `cicd` in the Kubernetes Namespace field. This is where your Jenkins agents will run within the Kubernetes cluster.
+- **Add Jenkins URL**: This should be the internal service URL for Jenkins within your Kubernetes cluster, like `http://jenkins.cicd.svc.cluster.local:8080`
+- **Add Pod Label**: Labels are key-value pairs used for identifying resources within Kubernetes. Here, you should add a label with the key `jenkins` and the value `agent`. This label will be used to associate the built pods with the Jenkins service.
+
+![image-20240212-115316.png](./Images/image-20240212-115316.png)![image-20240212-111931.png](./Images/image-20240212-111931.png)
+
+**Add a Pod Template**: This step involves defining a new pod template, which Jenkins will use to spin up agents on your Kubernetes cluster.
+
+- **Name**: Name the pod template `jenkins-builder`. This name is used to reference the pod template within Jenkins pipelines or job configurations.
+- **Namespace**: Specify `cicd` as the namespace where the Jenkins agents will be deployed within the Kubernetes cluster.
+- **Labels**: Set `jenkins-agent` as the label. This is a key identifier that Jenkins jobs will use to select this pod template when running builds.
+
+![image-20240212-112102.png](./Images/image-20240212-112102.png)
+
+**Add a Container**: In this part of the configuration, you define the container that will run inside the pod created from the pod template.
+
+**NOTE** This needs to point to the docker image built in this step : [Building the Jenkins Agent Image](https://github.com/frmscoe/docs/blob/main/Technical/Release-Management/building-the-jenkins-image.md)
+
+- **Name**: The container name is set to `jnlp`. This is a conventional name for a Jenkins agent container that uses the JNLP (Java Network Launch Protocol) for the master-agent communication.
+- **Docker Image**: The Docker image to use is [example.io/jenkins-inbound-agent:1.0.0](http://example.io/jenkins-inbound-agent:1.0.0) . This image is pre-configured with all the necessary tools to run as a Jenkins agent.
+- **Always Pull Image**: This option ensures that Jenkins always pulls the latest version of the specified Docker image before starting a build. This is important to keep your build environment up-to-date with the latest changes to the image.
+- **Working Directory**: The working directory is set to `/home/jenkins/agent`. This is the directory inside the container where Jenkins will execute the build steps.
+- **Command to Run**: This field is left blank, which means the default command from the Docker image will be used to start the agent.
+
+![image-20240212-115159.png](./Images/image-20240212-115159.png)
+
+**Run in Privileged Mode**: This is an advanced container setting that allows processes within the container to execute with elevated privileges, similar to the root user on a Linux system.
+
+To select "Run in Privileged Mode" in Jenkins Kubernetes plugin:
+
+1. Within the container configuration, look for the "Advanced..." button or link (not visible in the screenshot) and click it to expand the advanced options.
+2. In the advanced settings, find the checkbox labeled "Run in privileged mode" and select it.
+
+![image-20240212-114225.png](./Images/image-20240212-114225.png)
+
+**Image Pull Secret**
+
+Needs to be set to - **frmpullsecret - see screenshot below**
+
+1. **Private Registry Authentication**: If the container images used by your Jenkins jobs are hosted in a private registry, Kubernetes needs to authenticate with that registry. The image pull secret stores the required credentials (like a username and password or token).
+2. **Adding Image Pull Secret to Pod Template**:
+
+- Navigate to the Kubernetes cloud configuration within the Jenkins system settings.
+- Under the specific pod template that you are configuring, find the `ImagePullSecrets` section.
+- Enter the name of the Kubernetes secret that contains your private registry credentials in the `Name` field. This secret should already exist within the same namespace as where your Jenkins builder pods are running.
+- If you have multiple registries or need to pull from multiple private sources, you can add additional image pull secrets by clicking on the “Add Image Pull Secret” dropdown and entering the names of these secrets.
+
+3. **YAML Merge Strategy**: The YAML merge strategy determines how Jenkins should handle the YAML definitions from inherited pod templates. If set to 'Override', it means that the current YAML will completely replace any inherited YAML, which could be important if you need to ensure that the image pull secrets are applied without being altered by any inherited configurations.
+
+By properly configuring image pull secrets in your Jenkins Kubernetes pod templates, you enable Jenkins to pull the necessary private images to run your builds within the Kubernetes cluster. Without these secrets, the image pull would fail, and your builds would not be able to run.
+
+![image-20240215-144955.png](./Images/image-20240215-144955.png)
+
 #### Reload Jenkins Configuration:
 
 - You might need to manually reload the Jenkins configuration or restart the Jenkins service for the new job configurations to take effect. This can be done from the Jenkins interface or by restarting the Jenkins pod:
@@ -849,7 +873,7 @@ The process involves configuring Jenkins to deploy various processors into the T
 
 ### Populating ArangoDB:
 
-**Dashboard → Deployments→ ArangoDB**
+**Dashboard → Deployments→ Applications→ ArangoDB**
 
 Run the `Create Arango Setup` and then `Populate Arango Configuration` jobs to populate the ArangoDB with the correct configuration required by the system. This job would utilize the variables set in the global configuration to connect to ArangoDB and perform the necessary setup.
 
@@ -871,15 +895,7 @@ After importing the Jenkins jobs, you need to configure each job with the approp
 - Set the **Repository URL** to the Git repository where the code for the processor is located. This is typically a URL like https://github.com/<Repository>/event-director/.
 - Under Credentials, select the appropriate credentials from the drop-down list, such as **Github Creds**, which should correspond to the credentials that have access to the repository.
 
-3. **Kubernetes Configuration:**
-   
-**NOTE-** The Kubernetes server endpoint can be copied from your .kubeconfig file under cluster -> server
-
-- Check the option for **Setup Kubernetes CLI (kubectl**) if not already done.
-- Input the **Kubernetes server endpoint**; this is the API server URL of your Kubernetes cluster.
-- Select the **Credentials** for Kubernetes from the drop-down list, which will typically be a service account token or a kubeconfig file.
-
-4. **Binding Credentials:**
+3. **Binding Credentials:**
 
 - Under the **Bindings** section, define the environment variables that the job will use internally.
 - For username and password types, such as container registry credentials, set the appropriate **Username Variable** and **Password Variable**. Use **REG\_USER** and **REG\_PASS** for registry credentials.
@@ -894,7 +910,7 @@ By completing these steps, you ensure that each Jenkins job can access the neces
 
 ### Deploying to the Cluster:
 
-**Dashboard → Deployments→ Pipelines→ Deploying All Rules and Rule Processors**
+**Dashboard → Deployments → Jenkins Agent → Pipelines→ Deploying All Rules and Rule Processors**
 
 Run the Jenkins jobs that deploy the processors to the Tazama cluster. These jobs will reference the global environment variables you've configured, ensuring that each processor has the required connections and configurations.
 
@@ -917,11 +933,14 @@ The "E2E Test" job in Jenkins is an essential component for ensuring the integri
 
 #### Running the Test and Post-Test Evaluation
 
+- **Update your endpoints:** Update both the 'ofUrl' and the 'arangoUrl' used by your ingresses .
 - **Test Execution:** Trigger the E2E Test job.
 - **Monitoring Results:** Jenkins provides an overview of the job's results, including the last successful run, failures, and test durations.
 - **Post-Test Actions:** Upon completion of the E2E Test, it's crucial to examine the **evaluationResults** database within ArangoDB.
 - Navigate to the **transactions** collection within the database.
 - Confirm the presence of a transaction record, which signifies a successful end-to-end test execution.
+
+If for some reason the E2E job doesnt run double check your variables in the configuration of the job, if it still doesnt work you can use postman to test the E2E - Contact the Tazama Team.
 
 ![image-20240213-122427.png](./Images/image-20240213-122427.png)
 
@@ -1067,7 +1086,7 @@ data:
 
 ### Forbidden user on Jenkins job builds to deploy/restart pods 
 
-![Jenkins_service account_error.png](./Images/Jenkins_service account_error.png)
+![Jenkins_service_account_error.png](./Images/Jenkins_service_account_error.png)
 
 The error indicates that the Kubernetes service account `system:serviceaccount:cicd:default` does not have the necessary permissions to access the `deployments` resource in the `apps` group in the `processor` namespace.
 
@@ -1160,4 +1179,4 @@ For direct assistance:
 
 - Slack: [Tazama.slack.com](http://Tazama.slack.com)
 
-Joining the FRMS CoE workspace on Slack will connect you with a community of experts and peers who can offer insights and help you leverage the full potential of your FRMS system. Always ensure that you are working within secure communication channels and handling sensitive information with care.
+Joining the Tazama CoE workspace on Slack will connect you with a community of experts and peers who can offer insights and help you leverage the full potential of your Tazama system. Always ensure that you are working within secure communication channels and handling sensitive information with care.
