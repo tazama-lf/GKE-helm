@@ -51,8 +51,8 @@
       - [Copy Jobs to Jenkins Pod](#copy-jobs-to-jenkins-pod)
       - [Finalize the Setup](#finalize-the-setup)
       - [Reload Jenkins Configuration](#reload-jenkins-configuration)
-    - [Building Jenkins Agent Locally](#building-jenkins-agent-locally)
-    - [Setting up a Jenkins Cloud Agent](#setting-up-a-jenkins-cloud-agent)
+    - [Building Jenkins Agent Locally](#building-jenkin-agent-locally)
+    - [Setting up a Jenkins cloud agent that will interact with your Kubernetes cluster](#setting-up-a-jenkins-cloud-agent-that-will-interact-with-your-kubernetes-cluster)
 - [Step 4 - Running Jenkins Jobs to Install Processors](#step-4---running-jenkins-jobs-to-install-processors)
   - [Overview](#overview-1)
   - [Populating ArangoDB](#populating-arangodb)
@@ -205,6 +205,7 @@ helm install arango Tazama/arangodb --namespace=development
 helm install jenkins Tazama/jenkins --namespace=cicd
 helm install nats Tazama/nats --namespace=development
 ```
+
 3. Install Valkey. 
 
 Valkey is an open source (BSD) high-performance key/value datastore that supports a variety workloads such as caching, message queues, and can act as a primary database.
@@ -212,6 +213,26 @@ Valkey is an open source (BSD) high-performance key/value datastore that support
 ```bash
 helm install valkey-cluster bitnami/valkey-cluster --version 2.1.1 --namespace=development
 ```
+
+4. We're going to install Jenkins with helm by following the official docs. Take note of post installation notes to retrieve password and port forward.
+
+```bash
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+helm install jenkins jenkins/jenkins --set ingress.enabled=true --namespace=cicd
+```
+
+### Accessing Jenkins UI
+
+The following sections of the guide require you to work within the Jenkins UI. You can either access the UI through a doamin if you configured an ingress or by port forwarding.
+
+Port forward Jenkins to be accessible on localhost:8080 by running:
+  `kubectl --namespace cicd port-forward svc/jenkins 8080:8080`
+
+Get your 'admin' user password by running:
+  `kubectl exec --namespace cicd -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo`
+
+Navigate to the Jenkins UI, username `admin` and retrieved password to login. Go to `Manage Jenkins`, Under `System Configuration`, select `Plugins` and install the `Configuration File`, `Nodejs` and `Docker` plugins that will enable later configuration steps.
 
 **Additional**
 For optional components like Grafana, Prometheus, Vault, and KeyCloak, use similar commands if you decide to implement these features.
@@ -666,14 +687,24 @@ The same reasoning applies to passwords are that explicitly stated to need a sin
   - **value:** nats
 - `NATS_SERVER_URL`: The URL for the NATS server.
   - **value:** nats.development.svc.cluster.local:4222
-- `RedisCluster`: A flag to indicate if Redis is running in cluster mode.
+- `ValkeyCluster`: A flag to indicate if Valkey is running in cluster mode.
   - **value:** true
-- `RedisPassword`: The password for accessing Redis.
+- `ValkeyPassword`: The password for accessing Valkey.
   - **eg:** ty6r5\*&p0
-- `RedisServers`: The hostname for the Redis Cluster service. **NB:** The single quotes need to be added in to the host string.
-  - **value:** '[{"host": "redis-cluster.development.svc.cluster.local", "port":6379}]'
+- `ValkeyServers`: The hostname for the Valkey Cluster service. **NB:** The single quotes need to be added in to the host string.
+  - **value:** '[{"host": "valkey-cluster-primary-0.valkey-test-headless.default.svc.cluster.local", "port":6379}]'
 - `Repository`: This parameter specifies the name of a repository
   - **value:** frmscoe
+- `AUTH_URL`: This parameter specifies the Base URL where KeyCloak is hosted
+  - **value:** https://keycloak.example.com:8080
+- `KEYCLOAK_REALM`: This parameter specifies the KeyCloak Realm for Tazama
+  - **value:** tazama
+- `CERT_PATH_PRIVATE`: This parameter specifies the pem file path for signing Tazama tokens
+  - **value:** /path/to/private-key.pem
+- `CLIENT_SECRET`: This parameter specifies the secret of the KeyCloak client
+  - **value:** someClientGeneratedSecret123
+- `CLIENT_ID`: This parameter specifies the KeyCloak defined client for auth-lib
+  - **value:** auth-lib-client
 
 ### Adding Jenkins Jobs
 
@@ -728,7 +759,7 @@ kubectl rollout restart deployment <jenkins-deployment-name> -n cicd
 
 ![image-20240215-054140.png](./Images/image-20240215-054140.png)
 
-### Building Jenkin Agent Locally
+### Building Jenkins Agent Locally
 
 **This needs to be completed before adding the Jenkins Cloud agent.**
 
